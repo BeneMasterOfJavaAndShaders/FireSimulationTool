@@ -1,0 +1,45 @@
+color noAlpha(color orig) {
+  return color(red(orig), green(orig), blue(orig));
+}
+
+color setAlpha(color orig, float alpha) {
+  float a = alpha;
+  //a = brightness(orig);
+  return color(red(orig), green(orig), blue(orig), a);
+}
+
+PImage renderPoint(int r) {
+  PGraphics tPoint = createGraphics(r*2, r*2);
+  tPoint.smooth();
+  tPoint.beginDraw();
+  tPoint.stroke(255);
+  tPoint.strokeWeight(r);
+  tPoint.point(r, r);
+  tPoint.endDraw();
+  return tPoint;
+}
+
+void printNumberOfLines() {
+  File folder = new File(sketchPath());
+  String[] files = folder.list();
+  int count = 0;
+  for (int i=0; i<files.length; i++) {
+    if (files[i].endsWith(".pde")) {
+      count++;
+    }
+  }
+  int off = 0;
+  String[] programFiles = new String[count];
+  for (int i=0; i<files.length; i++) {
+    if (files[i].endsWith(".pde")) {
+      programFiles[i-off] = files[i];
+    } else {
+      off++;
+    }
+  }
+  int lineCount = -24;
+  for (int i=0; i<programFiles.length; i++) {
+    lineCount += loadStrings(programFiles[i]).length;
+  }
+  println("\n<< Program currently consists of [" + programFiles.length + "] Files with [" + lineCount + "] lines of Code >>");
+}
