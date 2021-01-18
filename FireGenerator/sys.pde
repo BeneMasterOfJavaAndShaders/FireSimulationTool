@@ -20,5 +20,5 @@ void keyReleased() {
 void paletteSelected(File selection) {
   println("User selected " + selection.getAbsolutePath());
   String file = selection.getAbsolutePath();
-  simulation.colors.set(loadImage(file));
+  simulation.colors.setPalette(loadImage(file));
 }

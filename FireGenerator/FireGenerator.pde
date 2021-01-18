@@ -1,3 +1,5 @@
+import com.jogamp.opengl.*;
+
 FireSimulation simulation;
 
 final static int pixelSize = 5;
@@ -33,12 +35,14 @@ void setup() {
   surface.setLocation(displayWidth/2-this.width-5, displayHeight/2-this.height/2);
 
   dw = new DebugView(simulation, pixelSize);
-  w = new EditorWindow(simulation);
+  //w = new EditorWindow(simulation);
   //w = new OptionWindow();
 }
 
 void draw() {
   surface.setTitle("Fire Fps: "+(int)frameRate);
+
+
 
   simulation.addFireMask(staticFire, -simulation.margin, -simulation.margin);
   if (mousePressed) {
@@ -46,10 +50,13 @@ void draw() {
     for (float l=0; l<1; l+=.05)
       simulation.addFireMask(point, (int)lerp(mouseX, pmouseX, l)/pixelSize - point.width/2, (int)lerp(mouseY, pmouseY, l)/pixelSize - point.height/2);
   }
+
   simulation.update();
+
 
   background(0);
   //background(0, 128, 0);
 
   image(simulation.getFrame(), 0, 0, width, height);
+  //image(simulation.fire, 0, 0, width, height);
 }

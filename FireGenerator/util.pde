@@ -8,6 +8,16 @@ color setAlpha(color orig, float alpha) {
   return color(red(orig), green(orig), blue(orig), a);
 }
 
+PImage scale(PImage img, int w, int h) {
+  PGraphics temp = createGraphics(w, h);
+  temp.noSmooth();
+  temp.beginDraw();
+  temp.imageMode(CORNERS);
+  temp.image(img, 0, 0, w, h);
+  temp.endDraw();
+  return temp;
+}
+
 PImage renderPoint(int r) {
   PGraphics tPoint = createGraphics(r*2, r*2);
   tPoint.smooth();

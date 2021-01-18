@@ -9,7 +9,6 @@ public final class FireSimulation {
 
   ColorRamp colors;
 
-
   public FireSimulation(int targetWidth, int targetHeight, int margin, float increment) {
     this.targetWidth = targetWidth;
     this.targetHeight = targetHeight;
@@ -33,22 +32,17 @@ public final class FireSimulation {
     fire.endDraw();
   }
 
-  public final PImage getFrame() {
-    PImage heat = this.fire.get(this.margin, this.margin, this.targetWidth, this.targetHeight);//remove margin
-    heat.loadPixels();
-    for (int x = 0; x < this.targetWidth; x++)
-      for (int y = 0; y < this.targetHeight; y++)
-        heat.pixels[y*this.targetWidth+x] = setAlpha(this.colors.sample(brightness(heat.pixels[y*this.targetWidth+x])/255.), min(brightness(heat.pixels[y*this.targetWidth+x])*2, 255));
+  public final PImage noMargin() {
+    return this.fire.get(this.margin, this.margin, this.targetWidth, this.targetHeight);//remove margin
+  }
 
-    heat.updatePixels();
-    return heat;
+  public final PImage getFrame() {
+    return this.colors.filter(this.noMargin());
   }
 
   public void update() {
     this.noiseMap.advance(this.noiseMapSpeed);
     this.flame(this.flameSteps, this.coolDown);
-    //for (int i=0; i<2; i++)
-    //this.flame(1, .4);
   }
 
   void flame(int isteps, float sub) {
@@ -58,10 +52,8 @@ public final class FireSimulation {
     this.fire.beginDraw();
     this.fire.loadPixels();
     nextFrame.beginDraw();
-    nextFrame.background(0, 0);
     nextFrame.loadPixels();
 
-    int w = this.simWidth;
     for (int x = 0; x < this.simWidth; x++) {
       for (int y = 0; y < this.simHeight; y++) {
         if (x==0 || x==this.simWidth-1 || y<=steps || y==this.simHeight-1) {
@@ -69,13 +61,13 @@ public final class FireSimulation {
           continue;
         }
 
-        int index0 = w*y + x;
-        int index1 = w*(y+0) + (x+1);
-        int index2 = w*(y+0) + (x-1);
-        int index3 = w*(y+1) + (x+0);
-        int index4 = w*(y-1) + (x+0);
+        int index0 = this.simWidth*y + x;
+        int index1 = this.simWidth*(y+0) + (x+1);
+        int index2 = this.simWidth*(y+0) + (x-1);
+        int index3 = this.simWidth*(y+1) + (x+0);
+        int index4 = this.simWidth*(y-1) + (x+0);
 
-        int index5 = w*(y-steps) + x;
+        int index5 = this.simWidth*(y-steps) + x;
 
         float c1 = brightness(fire.pixels[index1]);
         float c2 = brightness(fire.pixels[index2]);
@@ -91,6 +83,7 @@ public final class FireSimulation {
     }
 
     nextFrame.updatePixels();
+
     nextFrame.endDraw();
     this.fire.endDraw();
     this.fire = nextFrame;

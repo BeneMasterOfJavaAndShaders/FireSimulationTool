@@ -8,16 +8,16 @@ public final class ColorRamp {
   }
 
   public ColorRamp(PImage source) {
-    this.set(source);
+    this.setPalette(source);
     this.filter = false;
   }
 
   public ColorRamp(PImage source, boolean filter) {
-    this.set(source);
+    this.setPalette(source);
     this.filter = filter;
   }
 
-  public final void set(PImage source) {
+  public final void setPalette(PImage source) {
     //this.colors = new color[]{color(0), color(0), color(0)};
     //this.colors = new color[]{color(0)};
     this.colors = new color[]{};
@@ -38,6 +38,18 @@ public final class ColorRamp {
     if (mode==1)
       return noAlpha(raw);
     return raw;
+  }
+
+  public final PImage filter(PImage target) {
+    PImage output = createImage(target.width, target.height, ARGB);
+    target.loadPixels();
+    output.loadPixels();
+    for (int x = 0; x < output.width; x++)
+      for (int y = 0; y < output.height; y++)
+        output.pixels[y*output.width+x] = setAlpha(this.sample(brightness(target.pixels[y*target.width+x])/255.), min(brightness(target.pixels[y*target.width+x])*2, 255));
+
+    output.updatePixels();
+    return output;
   }
 
   public final color sample(float s) {
