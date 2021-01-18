@@ -1,5 +1,3 @@
-import com.jogamp.opengl.*;
-
 FireSimulation simulation;
 
 final static int pixelSize = 5;
