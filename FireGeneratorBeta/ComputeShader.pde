@@ -33,8 +33,11 @@ public final class ComputeShader extends ShaderProgram {
     }
   }
 
+  public void startCompute() {
+    this.gl.glUseProgram(programId);
+  }
+
   public void compute(int gx, int gy, int gz, int sx, int sy, int sz) {
-    this.gl.glUseProgram(programId); 
     //this.gl.glUniform1f(this.gl.glGetUniformLocation(this.programId, "delta"), 5);
     for (int i=0; i<this.numBuffers; i++)
       this.gl.glBindBufferBase(GL4.GL_SHADER_STORAGE_BUFFER, i, this.bufferHandles[i]); 
@@ -146,7 +149,7 @@ public class ShaderProgram {
   }
 
   public void stop(String msg) {
-    this.gl.getContext().destroy(); 
+    this.gl.getContext().destroy();
     System.out.println("Stop: "+msg);
   }
 }

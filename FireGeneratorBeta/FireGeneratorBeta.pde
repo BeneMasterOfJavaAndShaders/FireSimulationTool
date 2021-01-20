@@ -18,7 +18,7 @@ void setup() {
 
   point = renderPoint(5);
 
-  simulation = new FireSimulation(128, 128, 4, sqrt(pixelSize)/20);
+  simulation = new FireSimulation(128-8, 128-8, 4, sqrt(pixelSize)/20);
 
   PImage extMask = loadImage(dataPath("masks/Mask0.png"));
   staticFire = createImage(simulation.simWidth, simulation.simHeight, ARGB);
@@ -33,7 +33,7 @@ void setup() {
   surface.setLocation(displayWidth/2-this.width-5, displayHeight/2-this.height/2);
 
   dw = new DebugView(simulation, pixelSize);
-  //w = new EditorWindow(simulation);
+  w = new EditorWindow(simulation);
   //w = new OptionWindow();
 }
 

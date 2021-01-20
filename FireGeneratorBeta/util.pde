@@ -18,6 +18,16 @@ PGraphics scale(PImage img, int w, int h) {
   return temp;
 }
 
+PGraphics toGraphics(PImage img) {
+  PGraphics temp = createGraphics(img.width, img.height);
+  temp.noSmooth();
+  temp.beginDraw();
+  temp.imageMode(CORNERS);
+  temp.image(img, 0, 0, img.width, img.height);
+  temp.endDraw();
+  return temp;
+}
+
 PImage renderPoint(int r) {
   PGraphics tPoint = createGraphics(r*2, r*2);
   tPoint.smooth();
