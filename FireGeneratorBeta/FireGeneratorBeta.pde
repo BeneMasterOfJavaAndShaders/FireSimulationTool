@@ -1,6 +1,6 @@
 FireSimulation simulation;
 
-final static int pixelSize = 5;
+final static int pixelSize = 1;
 PImage staticFire;
 PImage point;
 
@@ -18,7 +18,7 @@ void setup() {
 
   point = renderPoint(5);
 
-  simulation = new FireSimulation(128-8, 128-8, 4, sqrt(pixelSize)/20);
+  simulation = new FireSimulation(16*4*16, 16*4*16, 4, sqrt(pixelSize*4)/20);
 
   PImage extMask = loadImage(dataPath("masks/Mask0.png"));
   staticFire = createImage(simulation.simWidth, simulation.simHeight, ARGB);
@@ -29,10 +29,10 @@ void setup() {
       staticFire.pixels[(simulation.simHeight-1-i) * simulation.simWidth + x] = color(255);
   staticFire.updatePixels();
 
-  surface.setSize(simulation.targetWidth * 5, simulation.targetHeight * 5);
+  surface.setSize((int)(simulation.targetWidth * pixelSize), (int)(simulation.targetHeight * pixelSize));
   surface.setLocation(displayWidth/2-this.width-5, displayHeight/2-this.height/2);
 
-  dw = new DebugView(simulation, pixelSize);
+  dw = new DebugView(simulation, max((int)pixelSize, 1));
   w = new EditorWindow(simulation);
   //w = new OptionWindow();
 }
@@ -40,19 +40,17 @@ void setup() {
 void draw() {
   surface.setTitle("Fire Fps: "+(int)frameRate);
 
-
-
   simulation.addFireMask(staticFire, -simulation.margin, -simulation.margin);
   if (mousePressed) {
-    simulation.addFireMask(point, mouseX/pixelSize - point.width/2, mouseY/pixelSize - point.height/2);
+    simulation.addFireMask(point, (int)(mouseX/pixelSize) - point.width/2, (int)(mouseY/pixelSize) - point.height/2);
     for (float l=0; l<1; l+=.05)
-      simulation.addFireMask(point, (int)lerp(mouseX, pmouseX, l)/pixelSize - point.width/2, (int)lerp(mouseY, pmouseY, l)/pixelSize - point.height/2);
+      simulation.addFireMask(point, (int)(lerp(mouseX, pmouseX, l)/pixelSize) - point.width/2, (int)(lerp(mouseY, pmouseY, l)/pixelSize) - point.height/2);
   }
 
   simulation.update();
 
 
-  background(0);
+  //background(0);
   //background(0, 128, 0);
 
   image(simulation.getFrame(), 0, 0, width, height);

@@ -41,12 +41,12 @@ public final class ColorRamp {
   }
 
   public final PImage filter(PImage target) {
-    PImage output = createImage(target.width, target.height, ARGB);
+    PImage output = createImage(target.width, target.height, RGB);
     target.loadPixels();
     output.loadPixels();
     for (int x = 0; x < output.width; x++)
       for (int y = 0; y < output.height; y++)
-        output.pixels[y*output.width+x] = setAlpha(this.sample(brightness(target.pixels[y*target.width+x])/255.), min(brightness(target.pixels[y*target.width+x])*2, 255));
+        output.pixels[y*output.width+x] = this.sample(brightness(target.pixels[y*target.width+x])/255.);//setAlpha(this.sample(brightness(target.pixels[y*target.width+x])/255.), min(brightness(target.pixels[y*target.width+x])*2, 255));
 
     output.updatePixels();
     return output;

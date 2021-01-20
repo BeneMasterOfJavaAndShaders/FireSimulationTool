@@ -11,14 +11,17 @@ public final class FireSimulation {
 
   ComputeShader computeShader;
 
-  public FireSimulation(int targetWidth, int targetHeight, int margin, float increment) {
-    this.targetWidth = targetWidth;
-    this.targetHeight = targetHeight;
+  public FireSimulation(int simWidth, int simHeight, int margin, float increment) {
+    this.simWidth = simWidth;
+    this.simHeight = simHeight;
     this.margin = margin;
-    this.simWidth = this.targetWidth + this.margin*2;
-    this.simHeight = this.targetHeight + this.margin*2;
+    this.targetWidth = this.simWidth - this.margin*2;
+    this.targetHeight = this.simHeight - this.margin*2;
 
     this.fire = createGraphics(this.simWidth, this.simHeight);
+    this.fire.beginDraw();
+    this.fire.background(0);
+    this.fire.endDraw();
     this.coolDown = 1;
 
     this.noiseMap = new NoiseMap(this.simWidth, this.simHeight, increment);
@@ -27,17 +30,13 @@ public final class FireSimulation {
 
     this.colors = new ColorRamp(loadImage(sketchPath()+"\\data\\Fire-1x.png"), false);
 
-    //+ "struct packet {"
-    //+ "  float val;"
-    //+ "};"
-
     final String computeShaderCode
       = "#version 430 core \n"
       + "#extension GL_ARB_compute_variable_group_size : enable \n"
       + "layout (local_size_variable) in; \n"        //+ "layout (local_size_x = 8, local_size_y = 8, local_size_z = 1) in; \n"
 
       + "uniform uint steps;"
-      //+ "uniform float sub;"
+      + "uniform float sub;"
 
       + "layout (std430, binding = 0) buffer buffer1 {"
       + "  float current[];"
@@ -66,19 +65,13 @@ public final class FireSimulation {
       + "}"
 
       + "float getFire(uint x, uint y) {"
-      //+ "  uint x = globalCoords().x;"
-      //+ "  uint y = globalCoords().y;"
       + "  uint w = globalSize().x;"
       + "  uint h = globalSize().y;"
-      + "  float sub = .5;"
 
-      + "  if(x==0 || x==w-1 || y==steps || y>=h-1-steps) {"
-      //+ "    next[y*w+x] = 0.0;"
+      + "  if(x==0 || x==w-1 || y==steps || y>=h-1-steps)"
       + "    return 0.;"
-      + "  }"
 
       + "  uint index0 = w*(y+0) + x;"
-
       + "  uint index1 = w*(y+steps+0) + (x+1);"
       + "  uint index2 = w*(y+steps+0) + (x-1);"
       + "  uint index3 = w*(y+steps+1) + (x+0);"
@@ -94,17 +87,10 @@ public final class FireSimulation {
 
       + "  float c5 = next[index0];"
       + "  return max(avg - c5*sub, 0);"
-      //+ "  next[index0] = newC;"
       + "}"
 
       + "void main(void) {"
-      //+ "  uvec2 globalSize = globalSize();"
-      //+ "  uvec2 globalCoords = globalCoords();"
-      //+ "  uint t = index(globalCoords());"
-
       + "  next[index(globalCoords())] = getFire(globalCoords().x, globalCoords().y);"
-
-      //+ "  next[t] = current[t];"
       + "}";
 
     this.computeShader = new ComputeShader(computeShaderCode, 2);
@@ -122,11 +108,13 @@ public final class FireSimulation {
 
   public final PImage getFrame() {
     return this.colors.filter(this.noMargin());
+    //return this.noMargin();
   }
 
   public final void update() {
     this.noiseMap.advance(this.noiseMapSpeed);
     this.flame(this.flameSteps, this.coolDown);
+    //this.updateFlameShader(this.flameSteps, this.coolDown);
   }
 
   public final FloatBuffer toBuffer(PImage src) {
@@ -151,7 +139,7 @@ public final class FireSimulation {
     return toGraphics(res);
   }
 
-  void applyShader(int steps, float sub) {
+  void updateFlameShader(int steps, float sub) {
     println("------------------------------------------------------------ Sim Start -----------------------------------------------------------");
 
     this.computeShader.buffers[0] = toBuffer(this.fire);
@@ -160,58 +148,55 @@ public final class FireSimulation {
     this.computeShader.upload();
     this.computeShader.startCompute();
     this.computeShader.gl.glUniform1ui(this.computeShader.gl.glGetUniformLocation(this.computeShader.programId, "steps"), steps);
-    //this.computeShader.gl.glUniform1f(this.computeShader.gl.glGetUniformLocation(this.computeShader.programId, "sub"), sub);
-    this.computeShader.compute(4, 4, 1, 32, 32, 1);
+    this.computeShader.gl.glUniform1f(this.computeShader.gl.glGetUniformLocation(this.computeShader.programId, "sub"), sub);
+    this.computeShader.compute(simWidth/8, simHeight/8, 1, 8, 8, 1);
     this.computeShader.download();
     this.fire = toGraphics(toImg((FloatBuffer)this.computeShader.buffers[1]));
   }
 
   void flame(int isteps, float sub) {
-    applyShader(isteps, sub);
+    int steps = isteps;
+    PGraphics nextFrame = createGraphics(this.simWidth, this.simHeight);
 
+    this.fire.beginDraw();
+    this.fire.loadPixels();
+    nextFrame.beginDraw();
+    nextFrame.loadPixels();
 
-    //int steps = isteps;
-    //PGraphics nextFrame = createGraphics(this.simWidth, this.simHeight);
+    for (int x = 0; x < this.simWidth; x++) {
+      for (int y = 0; y < this.simHeight; y++) {
+        if (x==0 || x==this.simWidth-1 || y==steps || y>=this.simHeight-1-steps) {
+          nextFrame.pixels[y * this.simWidth + x] = color(0);
+          continue;
+        }
 
-    //this.fire.beginDraw();
-    //this.fire.loadPixels();
-    //nextFrame.beginDraw();
-    //nextFrame.loadPixels();
+        int index0 = this.simWidth*(y+0) + x;
 
-    //for (int x = 0; x < this.simWidth; x++) {
-    //  for (int y = 0; y < this.simHeight; y++) {
-    //    if (x==0 || x==this.simWidth-1 || y==steps || y>=this.simHeight-1-steps) {
-    //      nextFrame.pixels[y * this.simWidth + x] = color(0);
-    //      continue;
-    //    }
+        int index1 = this.simWidth*(y+steps+0) + (x+1);
+        int index2 = this.simWidth*(y+steps+0) + (x-1);
+        int index3 = this.simWidth*(y+steps+1) + (x+0);
+        int index4 = this.simWidth*(y+steps-1) + (x+0);
+        int index5 = this.simWidth*(y+steps) + x;
 
-    //    int index0 = this.simWidth*(y+0) + x;
+        float c0 = brightness(fire.pixels[index1]);
+        float c1 = brightness(fire.pixels[index2]);
+        float c2 = brightness(fire.pixels[index3]);
+        float c3 = brightness(fire.pixels[index4]);
+        float c4 = brightness(fire.pixels[index5]);
+        float avg = (c0 + c1 + c2 + c3 + c4)/5;
 
-    //    int index1 = this.simWidth*(y+steps+0) + (x+1);
-    //    int index2 = this.simWidth*(y+steps+0) + (x-1);
-    //    int index3 = this.simWidth*(y+steps+1) + (x+0);
-    //    int index4 = this.simWidth*(y+steps-1) + (x+0);
-    //    int index5 = this.simWidth*(y+steps) + x;
+        float c5 = brightness(noiseMap.map.pixels[index0]);
 
-    //    float c0 = brightness(fire.pixels[index1]);
-    //    float c1 = brightness(fire.pixels[index2]);
-    //    float c2 = brightness(fire.pixels[index3]);
-    //    float c3 = brightness(fire.pixels[index4]);
-    //    float c4 = brightness(fire.pixels[index5]);
-    //    float avg = (c0 + c1 + c2 + c3 + c4)/5;
+        float newC = max(avg - c5*sub, 0);
 
-    //    float c5 = brightness(noiseMap.map.pixels[index0]);
+        nextFrame.pixels[index0] = color(newC);
+      }
+    }
 
-    //    float newC = max(avg - c5*sub, 0);
+    nextFrame.updatePixels();
 
-    //    nextFrame.pixels[index0] = color(newC);
-    //  }
-    //}
-
-    //nextFrame.updatePixels();
-
-    //nextFrame.endDraw();
-    //this.fire.endDraw();
-    //this.fire = nextFrame;
+    nextFrame.endDraw();
+    this.fire.endDraw();
+    this.fire = nextFrame;
   }
 }
