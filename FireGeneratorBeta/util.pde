@@ -8,7 +8,7 @@ color setAlpha(color orig, float alpha) {
   return color(red(orig), green(orig), blue(orig), a);
 }
 
-PImage scale(PImage img, int w, int h) {
+PGraphics scale(PImage img, int w, int h) {
   PGraphics temp = createGraphics(w, h);
   temp.noSmooth();
   temp.beginDraw();
