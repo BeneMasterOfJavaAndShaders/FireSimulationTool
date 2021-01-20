@@ -1,6 +1,6 @@
 FireSimulation simulation;
 
-final static int pixelSize = 1;
+final static int pixelSize = 3;
 PImage staticFire;
 PImage point;
 
@@ -14,11 +14,12 @@ void settings() {
 
 void setup() {
   this.printNumberOfLines();
-  frameRate(60);
+  frameRate(-1);
 
   point = renderPoint(5);
 
-  simulation = new FireSimulation(16*4*16, 16*4*16, 4, sqrt(pixelSize*4)/20);
+  //simulation = new FireSimulation(16*4*16, 16*4*16, 4, sqrt(pixelSize*4)/20);
+  simulation = new FireSimulation(4*4*16, 4*4*16, 4, sqrt(pixelSize*4)/20);
 
   PImage extMask = loadImage(dataPath("masks/Mask0.png"));
   staticFire = createImage(simulation.simWidth, simulation.simHeight, ARGB);
