@@ -8,12 +8,22 @@ color setAlpha(color orig, float alpha) {
   return color(red(orig), green(orig), blue(orig), a);
 }
 
-PImage scale(PImage img, int w, int h) {
+PGraphics scale(PImage img, int w, int h) {
   PGraphics temp = createGraphics(w, h);
   temp.noSmooth();
   temp.beginDraw();
   temp.imageMode(CORNERS);
   temp.image(img, 0, 0, w, h);
+  temp.endDraw();
+  return temp;
+}
+
+PGraphics toGraphics(PImage img) {
+  PGraphics temp = createGraphics(img.width, img.height);
+  temp.noSmooth();
+  temp.beginDraw();
+  temp.imageMode(CORNERS);
+  temp.image(img, 0, 0, img.width, img.height);
   temp.endDraw();
   return temp;
 }
